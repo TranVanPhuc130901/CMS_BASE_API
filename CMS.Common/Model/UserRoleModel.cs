@@ -1,0 +1,11 @@
+﻿namespace CMS_Common
+{
+    public class UserRoleModel
+    {
+        public int UserID { get; set; }
+
+        public int RoleID { get; set; }
+
+      
+    }
+}
