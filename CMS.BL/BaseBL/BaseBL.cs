@@ -102,7 +102,7 @@ namespace CMS_BL
         /// <param name="record">Thông tin bản ghi thêm mới</param>
         /// <returns>Bản ghi vừa thêm mới</returns>
         /// <exception cref="MyException"></exception>
-        public async virtual Task<ServicesResult> CreateRecord(TResult record)
+        public virtual async  Task<ServicesResult> CreateRecord(TResult record)
         {
             try
             {

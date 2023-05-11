@@ -248,7 +248,7 @@ namespace CMS_Common.Database
                 e.HasOne(u => u.Accounts)
                     .WithMany(u => u.Comments)
                     .HasForeignKey(u => u.UserID).
-                    HasConstraintName("FK_Comment_User");
+                    HasConstraintName("FK_Comment_Account");
             });
         }
         #endregion

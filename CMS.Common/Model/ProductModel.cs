@@ -58,6 +58,8 @@ namespace CMS_Common
 
         public StatusImage IsDefault { get; set; }
 
+        public int CategoryId { get; set; }
+
         //public List<ProductImage> ProductImages { get; set; }
 
 

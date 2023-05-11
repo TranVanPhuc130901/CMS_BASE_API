@@ -8,7 +8,7 @@ namespace CMS_BASE_API.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize(Policy = "UserPermission")]
+    //[Authorize(Policy = "UserPermission")]
     public class UserController : ControllerBase
     {
         private readonly IConfiguration _configuration;

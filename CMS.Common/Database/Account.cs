@@ -58,7 +58,7 @@
         /// Thời gian RefreshToken hết hạn
         /// </summary>
         public DateTime ExpiresToken { set; get; }
-        public ICollection<UserRole>? userRoles { get; set; }
+        public ICollection<UserRole> ?userRoles { get; set; }
 
         public ICollection<Comment> ?Comments { get; set; }
 

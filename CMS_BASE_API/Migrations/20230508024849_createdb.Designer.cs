@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMS_BASE_API.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20230424084859_UpdateComment")]
-    partial class UpdateComment
+    [Migration("20230508024849_createdb")]
+    partial class createdb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -486,7 +486,7 @@ namespace CMS_BASE_API.Migrations
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_Comment_User");
+                        .HasConstraintName("FK_Comment_Account");
 
                     b.Navigation("Accounts");
 

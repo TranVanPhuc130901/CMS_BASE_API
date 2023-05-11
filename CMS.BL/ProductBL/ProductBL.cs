@@ -2,10 +2,12 @@
 using CMS_Common;
 using CMS_Common.Database;
 using CMS_Common.Dtos;
+using CMS_Common.Model;
 using CMS_DL;
 using CMS_DL.ProductDL;
 using CMS_WT_API.Dtos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CMS_BL.ProductBL
@@ -37,12 +39,12 @@ namespace CMS_BL.ProductBL
         }
         #endregion
         #region overide
-        public async override Task<List<ProductModel>> GetAllRecord()
+        public override async Task<List<ProductModel>> GetAllRecord()
         {
             try
             {
                 var query = _context.Products
-                    .Include(p => p.ProductCategories)
+                    .Include(p => p.ProductCategories)!
                         .ThenInclude(pc => pc.Category)
                     .Include(p => p.ProductImages)
                     .Include(p => p.ProductContents)
@@ -54,20 +56,20 @@ namespace CMS_BL.ProductBL
                 var records = await query.Select(x => new ProductModel()
                 {
                     ProductID = x.ProductID,
-                    ProductCode = x.ProductCode.FirstOrDefault() != null ? x.ProductCode.FirstOrDefault().ToString() : "",
-                    ProductName = x.ProductName.FirstOrDefault() != null ? x.ProductName.FirstOrDefault().ToString() : "",
-                    ProductDescription = x.ProductDescription.FirstOrDefault() != null ? x.ProductDescription.FirstOrDefault().ToString() : "",
+                    ProductCode = x.ProductCode,
+                    ProductName = x.ProductName,
+                    ProductDescription = x.ProductDescription,
                     CreatedDate = x.CreatedDate,
                     ModifinedDate = x.ModifinedDate,
                     ProductStatus = x.ProductStatus,
-                    ProductImageSlug = x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault().ProductImageSlug : "",
-                    IsDefault = x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault().IsDefault : 0,
-                    ProductCost = x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault().ProductCost : 0,
-                    ProductPromotional = x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault().ProductPromotional : 0,
-                    ProductContentName = x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault().ProductContentName : "",
-                    ProductMetaDataTitle = x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault().ProductMetaDataTitle : "",
-                    ProductMetadataDescrition = x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault().ProductMetadataDescrition : "",
-                    CategoryName = x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault().Category.CategoryName : ""
+                    ProductImageSlug = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.ProductImageSlug : "",
+                    IsDefault = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.IsDefault : 0,
+                    ProductCost = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductCost : 0,
+                    ProductPromotional = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductPromotional : 0,
+                    ProductContentName = x.ProductContents != null && x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault()!.ProductContentName : "",
+                    ProductMetaDataTitle = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetaDataTitle : "",
+                    ProductMetadataDescrition = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetadataDescrition : "",
+                    CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : ""
                 }).ToListAsync();
                 return records;
             }
@@ -94,42 +96,80 @@ namespace CMS_BL.ProductBL
             var record = await query.Select(x => new ProductModel()
             {
                 ProductID = x.ProductID,
-                ProductCode = x.ProductCode.FirstOrDefault() != null ? x.ProductCode.FirstOrDefault().ToString() : "",
-                ProductName = x.ProductName.FirstOrDefault() != null ? x.ProductName.FirstOrDefault().ToString() : "",
-                ProductDescription = x.ProductDescription.FirstOrDefault() != null ? x.ProductDescription.FirstOrDefault().ToString() : "",
+                ProductCode = x.ProductCode,
+                ProductName = x.ProductName,
+                ProductDescription = x.ProductDescription,
                 CreatedDate = x.CreatedDate,
                 ModifinedDate = x.ModifinedDate,
                 ProductStatus = x.ProductStatus,
-                ProductImageSlug = x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault().ProductImageSlug : "",
-                IsDefault = x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault().IsDefault : 0,
-                ProductCost = x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault().ProductCost : 0,
-                ProductPromotional = x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault().ProductPromotional : 0,
-                ProductContentName = x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault().ProductContentName : "",
-                ProductMetaDataTitle = x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault().ProductMetaDataTitle : "",
-                ProductMetadataDescrition = x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault().ProductMetadataDescrition : "",
-                CategoryName = x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault().Category.CategoryName : ""
+                ProductImageSlug = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.ProductImageSlug : "",
+                IsDefault = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.IsDefault : 0,
+                ProductCost = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductCost : 0,
+                ProductPromotional = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductPromotional : 0,
+                ProductContentName = x.ProductContents != null && x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault()!.ProductContentName : "",
+                ProductMetaDataTitle = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetaDataTitle : "",
+                ProductMetadataDescrition = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetadataDescrition : "",
+                CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : ""
             }).FirstOrDefaultAsync();
-            return record;
+            return record!;
         }
-        public async override Task<ServicesResult> CreateRecord(ProductModel newProduct)
+        public override async Task<ServicesResult> CreateRecord(ProductModel model)
         {
             try
             {
-                // Gọi phương thức GetNewCode để tạo ra ProductID mới
-                var newCode = await GetNewCode();
+                var newProduct = new Product
+                {
+                    ProductCode = model.ProductCode,
+                    ProductName = model.ProductName,
+                    ProductDescription = model.ProductDescription,
+                    // Gán các trường khác trong bảng Product
+                };
 
-                // Gán ProductID mới cho đối tượng newProduct
-                newProduct.ProductID = newCode;
+                var newProductContent = new ProductContent
+                {
+                    ProductContentName = model.ProductContentName,
+                    // Gán các trường khác trong bảng ProductContent
+                };
 
-                // Thực hiện lưu mới sản phẩm vào cơ sở dữ liệu
-                var product = _mapper.Map<Product>(newProduct);
+                var newProductImage = new ProductImage
+                {
+                    ProductImageSlug = model.ProductImageSlug,
+                    //IsDefault = model.IsDefault,
+                    // Gán các trường khác trong bảng ProductImage
+                };
 
-                var result = await _productDL.CreateRecord(product);
+                var newProductMetaData = new ProductMetaData
+                {
+                    ProductMetaDataTitle = model.ProductMetaDataTitle,
+                    ProductMetadataDescrition = model.ProductMetadataDescrition,
+                    // Gán các trường khác trong bảng ProductMetaData
+                };
+
+                var newProductPrice = new ProductPrice
+                {
+                    ProductCost = model.ProductCost,
+                    ProductPromotional = model.ProductPromotional,
+                    // Gán các trường khác trong bảng ProductPrice
+                };
+
+                var category = await _context.Categories.FindAsync(model.CategoryId);
+                var newProductCategory = new ProductCategory
+                {
+                    Category = category
+                };
+
+                newProduct.ProductContents = new List<ProductContent> { newProductContent };
+                newProduct.ProductImages = new List<ProductImage> { newProductImage };
+                newProduct.ProductMetaDatas = new List<ProductMetaData> { newProductMetaData };
+                newProduct.ProductPrices = new List<ProductPrice> { newProductPrice };
+                newProduct.ProductCategories = new List<ProductCategory> { newProductCategory };
+
+                _context.Products.Add(newProduct);
+                await _context.SaveChangesAsync();
 
                 return new ServicesResult
                 {
-                    isSuccess = true,
-
+                    isSuccess = true
                 };
             }
             catch (Exception ex)
@@ -143,17 +183,17 @@ namespace CMS_BL.ProductBL
             try
             {
                 var query = _context.Products
-                .Include(p => p.ProductCategories)
+                    .Include(p => p.ProductCategories)!
                     .ThenInclude(pc => pc.Category)
-                .Include(p => p.ProductImages)
-                .Include(p => p.ProductContents)
-                .Include(p => p.ProductMetaDatas)
-                .Include(p => p.ProductPrices)
-                .AsQueryable();
+                    .Include(p => p.ProductImages)
+                    .Include(p => p.ProductContents)
+                    .Include(p => p.ProductMetaDatas)
+                    .Include(p => p.ProductPrices)
+                    .AsQueryable();
 
                 if (!string.IsNullOrEmpty(keyWord))
                 {
-                    query = query.Where(x => x.ProductCode.Contains(keyWord));
+                    query = query.Where(x => x.ProductCode!.Contains(keyWord));
                 }
                 else
                 {
@@ -171,20 +211,20 @@ namespace CMS_BL.ProductBL
                 var data = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new ProductModel()
                 {
                     ProductID = x.ProductID,
-                    ProductCode = x.ProductCode.FirstOrDefault() != null ? x.ProductCode.FirstOrDefault().ToString() : "",
-                    ProductName = x.ProductName.FirstOrDefault() != null ? x.ProductName.FirstOrDefault().ToString() : "",
-                    ProductDescription = x.ProductDescription.FirstOrDefault() != null ? x.ProductDescription.FirstOrDefault().ToString() : "",
+                    ProductCode = x.ProductCode,
+                    ProductName = x.ProductName,
+                    ProductDescription = x.ProductDescription,
                     CreatedDate = x.CreatedDate,
                     ModifinedDate = x.ModifinedDate,
                     ProductStatus = x.ProductStatus,
-                    ProductImageSlug = x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault().ProductImageSlug : "",
-                    IsDefault = x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault().IsDefault : 0,
-                    ProductCost = x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault().ProductCost : 0,
-                    ProductPromotional = x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault().ProductPromotional : 0,
-                    ProductContentName = x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault().ProductContentName : "",
-                    ProductMetaDataTitle = x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault().ProductMetaDataTitle : "",
-                    ProductMetadataDescrition = x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault().ProductMetadataDescrition : "",
-                    CategoryName = x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault().Category.CategoryName : ""
+                    ProductImageSlug = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.ProductImageSlug : "",
+                    IsDefault = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.IsDefault : 0,
+                    ProductCost = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductCost : 0,
+                    ProductPromotional = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductPromotional : 0,
+                    ProductContentName = x.ProductContents != null && x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault()!.ProductContentName : "",
+                    ProductMetaDataTitle = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetaDataTitle : "",
+                    ProductMetadataDescrition = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetadataDescrition : "",
+                    CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : ""
                 }).ToListAsync();
 
                 var productModel = _mapper.Map<List<ProductModel>>(data);
@@ -231,6 +271,8 @@ namespace CMS_BL.ProductBL
             }).ToListAsync();
             return _mapper.Map<List<ProductModel>>(records);
         }
+
+        
         #endregion
     }
 }

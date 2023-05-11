@@ -483,7 +483,7 @@ namespace CMS_BASE_API.Migrations
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_Comment_User");
+                        .HasConstraintName("FK_Comment_Account");
 
                     b.Navigation("Accounts");
 
