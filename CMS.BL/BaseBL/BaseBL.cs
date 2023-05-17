@@ -131,12 +131,16 @@ namespace CMS_BL
         /// <param name="recordId">ID bản ghi vừa sửa</param>
         /// <returns></returns>
         /// <exception cref="MyException"></exception>
-        public virtual async Task<int> UpdateRecord(TResult record, int recordId)
+        public virtual async Task<ServicesResult> UpdateRecord(TResult record, int recordId)
         {
             try
             {
                 var mappedRecord = _mapper.Map<T>(record);
-                return await _baseDL.UpdateRecord(mappedRecord, recordId);
+                 await _baseDL.UpdateRecord(mappedRecord, recordId);
+                 return new ServicesResult
+                 {
+                     isSuccess = true
+                 };
             }
             catch (Exception ex)
             {

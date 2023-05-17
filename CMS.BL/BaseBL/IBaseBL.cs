@@ -28,7 +28,7 @@ namespace CMS_BL
         /// <param name="record">Thông tin bản ghi vừa sửa</param>
         /// <param name="recordId">ID bản ghi muốn sửa</param>
         /// <returns>ID bản ghi vừa sửa</returns>
-        Task<int> UpdateRecord(TResult record, int recordId);
+        Task<ServicesResult> UpdateRecord(TResult record, int recordId);
         /// <summary>
         /// xóa bản ghi theo Id
         /// </summary>

@@ -114,7 +114,11 @@ namespace CMS_BASE_API.Controllers
 
             try
             {
-                await _baseBL.UpdateRecord(record, recordId);
+               var result = await _baseBL.UpdateRecord(record, recordId);
+                if (result.isSuccess == false)
+                {
+                    return BadRequest();
+                }
                 return Ok(recordId);
             }
             catch (MyException ex)

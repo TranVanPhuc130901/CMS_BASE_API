@@ -2,13 +2,10 @@
 using CMS_Common;
 using CMS_Common.Database;
 using CMS_Common.Dtos;
-using CMS_Common.Model;
 using CMS_DL;
 using CMS_DL.ProductDL;
 using CMS_WT_API.Dtos;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace CMS_BL.ProductBL
 {
@@ -63,13 +60,13 @@ namespace CMS_BL.ProductBL
                     ModifinedDate = x.ModifinedDate,
                     ProductStatus = x.ProductStatus,
                     ProductImageSlug = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.ProductImageSlug : "",
-                    IsDefault = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.IsDefault : 0,
                     ProductCost = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductCost : 0,
                     ProductPromotional = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductPromotional : 0,
                     ProductContentName = x.ProductContents != null && x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault()!.ProductContentName : "",
                     ProductMetaDataTitle = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetaDataTitle : "",
                     ProductMetadataDescrition = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetadataDescrition : "",
-                    CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : ""
+                    CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : "",
+                    CategoryId = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryID : 0
                 }).ToListAsync();
                 return records;
             }
@@ -103,16 +100,142 @@ namespace CMS_BL.ProductBL
                 ModifinedDate = x.ModifinedDate,
                 ProductStatus = x.ProductStatus,
                 ProductImageSlug = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.ProductImageSlug : "",
-                IsDefault = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.IsDefault : 0,
                 ProductCost = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductCost : 0,
                 ProductPromotional = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductPromotional : 0,
                 ProductContentName = x.ProductContents != null && x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault()!.ProductContentName : "",
                 ProductMetaDataTitle = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetaDataTitle : "",
                 ProductMetadataDescrition = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetadataDescrition : "",
-                CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : ""
+                CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : "",
+                CategoryId = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryID : 0
             }).FirstOrDefaultAsync();
             return record!;
         }
+
+        public override async Task<ServicesResult> UpdateRecord(ProductModel record, int recordId)
+        {
+            try
+            {
+                var existingProduct = await _context.Products
+                    .Include(p => p.ProductContents)
+                    .Include(p => p.ProductImages)
+                    .Include(p => p.ProductMetaDatas)
+                    .Include(p => p.ProductPrices)
+                    .Include(p => p.ProductCategories)
+                    .FirstOrDefaultAsync(p => p.ProductID == recordId);
+
+                if (existingProduct != null)
+                {
+                    existingProduct.ProductCode = record.ProductCode;
+                    existingProduct.ProductName = record.ProductName;
+                    existingProduct.ProductDescription = record.ProductDescription;
+                    // Cập nhật các trường khác trong bảng Product
+
+                    var existingProductContent = existingProduct.ProductContents.FirstOrDefault(pc => pc.ProductID == recordId);
+                    if (existingProductContent != null)
+                    {
+                        existingProductContent.ProductContentName = record.ProductContentName;
+                        // Cập nhật các trường khác trong bảng ProductContent
+                    }
+                    else
+                    {
+                        existingProductContent = new ProductContent
+                        {
+                            ProductContentName = record.ProductContentName,
+                            // Gán các trường khác trong bảng ProductContent
+                        };
+                        existingProduct.ProductContents.Add(existingProductContent);
+                    }
+
+                    var existingProductImage = existingProduct.ProductImages.FirstOrDefault();
+                    if (existingProductImage != null)
+                    {
+                        existingProductImage.ProductImageSlug = record.ProductImageSlug;
+                        // Cập nhật các trường khác trong bảng ProductImage
+                    }
+                    else
+                    {
+                        existingProductImage = new ProductImage
+                        {
+                            ProductImageSlug = record.ProductImageSlug,
+                            // Gán các trường khác trong bảng ProductImage
+                        };
+                        existingProduct.ProductImages.Add(existingProductImage);
+                    }
+
+                    var existingProductMetaData = existingProduct.ProductMetaDatas.FirstOrDefault();
+                    if (existingProductMetaData != null)
+                    {
+                        existingProductMetaData.ProductMetaDataTitle = record.ProductMetaDataTitle;
+                        existingProductMetaData.ProductMetadataDescrition = record.ProductMetadataDescrition;
+                        // Cập nhật các trường khác trong bảng ProductMetaData
+                    }
+                    else
+                    {
+                        existingProductMetaData = new ProductMetaData
+                        {
+                            ProductMetaDataTitle = record.ProductMetaDataTitle,
+                            ProductMetadataDescrition = record.ProductMetadataDescrition,
+                            // Gán các trường khác trong bảng ProductMetaData
+                        };
+                        existingProduct.ProductMetaDatas.Add(existingProductMetaData);
+                    }
+
+                    var existingProductPrice = existingProduct.ProductPrices.FirstOrDefault();
+                    if (existingProductPrice != null)
+                    {
+                        existingProductPrice.ProductCost = record.ProductCost;
+                        existingProductPrice.ProductPromotional = record.ProductPromotional;
+                        // Cập nhật các trường khác trong bảng ProductPrice
+                    }
+                    else
+                    {
+                        existingProductPrice = new ProductPrice
+                        {
+                            ProductCost = record.ProductCost,
+                            ProductPromotional = record.ProductPromotional,
+                        };
+                        existingProduct.ProductPrices.Add(existingProductPrice);
+                    }
+
+                    var category = await _context.Categories.FindAsync(record.CategoryId);
+                    if (category != null)
+                    {
+                        var existingProductCategory = existingProduct.ProductCategories.FirstOrDefault();
+                        if (existingProductCategory != null)
+                        {
+                            existingProduct.ProductCategories.Remove(existingProductCategory);
+                        }
+
+                        await _context.SaveChangesAsync();
+
+                        existingProductCategory = new ProductCategory
+                        {
+                            Category = category
+                        };
+                        existingProduct.ProductCategories.Add(existingProductCategory);
+                    }
+
+                    await _context.SaveChangesAsync();
+
+                    return new ServicesResult
+                    {
+                        isSuccess = true
+                    };
+                }
+
+                return new ServicesResult
+                {
+                    isSuccess = false
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new MyException("This is my exception");
+            }
+        }
+
+
         public override async Task<ServicesResult> CreateRecord(ProductModel model)
         {
             try
@@ -218,13 +341,13 @@ namespace CMS_BL.ProductBL
                     ModifinedDate = x.ModifinedDate,
                     ProductStatus = x.ProductStatus,
                     ProductImageSlug = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.ProductImageSlug : "",
-                    IsDefault = x.ProductImages != null && x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault()!.IsDefault : 0,
                     ProductCost = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductCost : 0,
                     ProductPromotional = x.ProductPrices != null && x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault()!.ProductPromotional : 0,
                     ProductContentName = x.ProductContents != null && x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault()!.ProductContentName : "",
                     ProductMetaDataTitle = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetaDataTitle : "",
                     ProductMetadataDescrition = x.ProductMetaDatas != null && x.ProductMetaDatas.FirstOrDefault() != null ? x.ProductMetaDatas.FirstOrDefault()!.ProductMetadataDescrition : "",
-                    CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : ""
+                    CategoryName = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryName : "",
+                    CategoryId = x.ProductCategories != null && x.ProductCategories.FirstOrDefault() != null ? x.ProductCategories.FirstOrDefault()!.Category!.CategoryID : 0
                 }).ToListAsync();
 
                 var productModel = _mapper.Map<List<ProductModel>>(data);
@@ -261,7 +384,6 @@ namespace CMS_BL.ProductBL
                 ModifinedDate = x.ModifinedDate,
                 ProductStatus = x.ProductStatus,
                 ProductImageSlug = x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault().ProductImageSlug : "",
-                IsDefault = x.ProductImages.FirstOrDefault() != null ? x.ProductImages.FirstOrDefault().IsDefault : 0,
                 ProductCost = x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault().ProductCost : 0,
                 ProductPromotional = x.ProductPrices.FirstOrDefault() != null ? x.ProductPrices.FirstOrDefault().ProductPromotional : 0,
                 ProductContentName = x.ProductContents.FirstOrDefault() != null ? x.ProductContents.FirstOrDefault().ProductContentName : "",
@@ -271,8 +393,6 @@ namespace CMS_BL.ProductBL
             }).ToListAsync();
             return _mapper.Map<List<ProductModel>>(records);
         }
-
-        
         #endregion
     }
 }

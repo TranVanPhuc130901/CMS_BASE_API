@@ -25,22 +25,21 @@ namespace CMS_DL.ProductDL
             var productId = RandomID.GenerateRandomNumber();
             return productId;
         }
-        public List<Object> GetImageByProductID(int productId)
+        public List<object> GetImageByProductID(int productId)
         {
             try
             {
-                // Tạo query join đến bảng image để lấy ra ảnh
                 var query = from product in _context.Products
-                            join image in _context.ProductImages
-                            on product.ProductID equals image.ProductID
-                            where product.ProductID == productId
-                            select new
-                            {
-                                ProductID = product.ProductID,
-                                ProductName = product.ProductName.FirstOrDefault() != null ? product.ProductName.FirstOrDefault().ToString() : "",
-                                ProductImageSlug = image.ProductImageSlug,
-                                IsDefault = image.IsDefault
-                            };
+                    join image in _context.ProductImages
+                        on product.ProductID equals image.ProductID
+                    where product.ProductID == productId
+                    select new
+                    {
+                        ProductID = product.ProductID,
+                        ProductName = product.ProductName != null ? string.Join("", product.ProductName) : "",
+                        ProductImageSlug = image.ProductImageSlug,
+                        IsDefault = image.IsDefault
+                    };
 
                 return query.Cast<object>().ToList();
             }
@@ -50,6 +49,7 @@ namespace CMS_DL.ProductDL
                 throw;
             }
         }
+
         /// <summary>
         /// Lấy tất cả sản phẩm có cùng danh mục
         /// </summary>

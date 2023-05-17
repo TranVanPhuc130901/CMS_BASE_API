@@ -55,9 +55,6 @@ namespace CMS_Common
         public string? ProductMetadataDescrition { get; set; }
 
         public string? CategoryName { get; set; }
-
-        public StatusImage IsDefault { get; set; }
-
         public int CategoryId { get; set; }
 
         //public List<ProductImage> ProductImages { get; set; }
