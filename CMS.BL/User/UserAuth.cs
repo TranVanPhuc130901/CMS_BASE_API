@@ -86,6 +86,7 @@ namespace CMS_BL
                     Token = user.Token,
                     RefreshToken = user.RefreshToken,
                     TokenExpires = user.ExpiresToken,
+                    FullName = user.Fullname
                 };
 
                 return authReponseDto;

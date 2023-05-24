@@ -11,5 +11,7 @@
         public string RefreshToken { get; set; } = string.Empty;
 
         public DateTime TokenExpires { get; set; }
+
+        public string FullName { get; set; }
     }
 }

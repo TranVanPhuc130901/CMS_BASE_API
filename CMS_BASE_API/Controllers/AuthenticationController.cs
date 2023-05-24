@@ -44,7 +44,8 @@ namespace CMS_BASE_API.Controllers
                         Message = "Đăng nhập thành công",
                         Token = user.Token,
                         RefreshToken = user.RefreshToken,
-                        TokenExpires = user.TokenExpires
+                        TokenExpires = user.TokenExpires,
+                        FullName = user.FullName,
                     };
 
                     return Ok(authResponse);
