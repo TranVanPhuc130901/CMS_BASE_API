@@ -54,6 +54,7 @@ builder.Services.AddCors(p => p.AddPolicy("MyCors", build =>
     build.AllowAnyOrigin();
 }));
 
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -80,6 +81,12 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+});
+
 builder.Services.AddSwaggerGen(options =>
 {
     // định nghĩa 1 bản mật cho swagger vơi tên là oauth2 với kiểu là apikey dùng JWT bearer để bảo mật
@@ -153,6 +160,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");

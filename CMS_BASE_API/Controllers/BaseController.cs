@@ -12,7 +12,7 @@ namespace CMS_BASE_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Policy = "PermissionManager")]
+    [Authorize(Policy = "PermissionManager")]
     public abstract class BaseController<T, TResult> : ControllerBase where T : class where TResult : class
     {
         #region fileds

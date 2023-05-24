@@ -51,11 +51,6 @@ namespace CMS_BL
             var user = await _dbContext.Users
                  .Where(u => u.Username == request.Username)
                  .FirstOrDefaultAsync();
-            //byte[] passwordHash;
-            //byte[] passwordSalt;
-            //var pass = CreatePasswordHash(usermd.Password, out passwordHash, out passwordSalt);
-
-            //var verify = VerifyPasswordHash(usermd.Password, user.PasswordHash, user.PasswordSaft);
             if (user == null)
             {
                 return new AuthMessageDto { Message = "Tên đăng nhập không tồn tại trong hệ thống, vui lòng kiểm tra lại" };
@@ -70,6 +65,7 @@ namespace CMS_BL
                 var refreshToken = CreateRefreshToken();
                 SetRefreshToken(refreshToken, user);
                 var Token = CreateToken(user);
+                SetToken(Token, user);
 
                 user.Token = Token.newToken;
                 user.CreateToken = Token.CreateToken;
@@ -91,7 +87,6 @@ namespace CMS_BL
                     RefreshToken = user.RefreshToken,
                     TokenExpires = user.ExpiresToken,
                 };
-
 
                 return authReponseDto;
             }
@@ -315,9 +310,24 @@ namespace CMS_BL
                 Expires = newToken.Expires
             };
             _httpContextAccessor.HttpContext.Response.Cookies.Append("refreshToken", newToken.Token, cookieOptions);
+            account.Token = newToken.Token;
             account.RefreshToken = newToken.Token;
             account.CreatedRefreshToken = newToken.Create;
             account.ExpiresRefreshToken = newToken.Expires;
+        }
+
+        private void SetToken(Token newToken, Account account)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = newToken.ExpiresToken
+            };
+
+            _httpContextAccessor.HttpContext.Response.Cookies.Append("Token", newToken.newToken, cookieOptions);
+            account.Token = newToken.newToken;
+            account.CreateToken = newToken.CreateToken;
+            account.ExpiresToken = newToken.ExpiresToken;
         }
 
         /// <summary>

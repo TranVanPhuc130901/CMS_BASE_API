@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CMS_Common;
 using CMS_Common.Database;
+using CMS_Common.Dtos;
 using CMS_Common.Model;
 using CMS_DL;
 using CMS_WT_API.Dtos;
@@ -28,27 +29,6 @@ namespace CMS_BL.ArticleBL
         {
             try
             {
-                //var records = await _context.Articels
-                // .Join(_context.TagsArticles, a => a.ArticleID, ta => ta.ArticleID, (a, ta) => new { Article = a, TagArticle = ta })
-                // .Join(_context.Tags, x => x.TagArticle.TagID, t => t.TagID, (x, t) => new { x.Article, Tag = t })
-                // .Join(_context.Comments, x => x.Article.ArticleID, c => c.ArticleID, (x, c) => new { x.Article, x.Tag, Comment = c })
-                // .Join(_context.Users, x => x.Comment.UserID, u => u.UserID, (x, u) => new { x.Article, x.Tag, x.Comment, User = u })
-                // .Join(_context.ArticleCategorieArticles, x => x.Article.ArticleID, ca => ca.ArticleID, (x, ca) => new { x.Article, x.Tag, x.Comment, x.User, ArticleCategoryArticle = ca })
-                // .Join(_context.CategoryArticles, x => x.ArticleCategoryArticle.CategoryArticleID, ca => ca.CategoryActicleID, (x, ca) => new ArticleModel
-                // {
-                //     ArticleID = x.Article.ArticleID,
-                //     Title = x.Article.Title,
-                //     Content = x.Article.Content,
-                //     Description = x.Article.Description,
-                //     Author = x.Article.Author,
-                //     Image = x.Article.Image,
-                //     CreateAt = x.Article.CreateAt,
-                //     TagName = x.Tag.TagName,
-                //     UserName = x.User.Username,
-                //     ContentComment = x.Comment.Content,
-                //     CategoryName = ca.CategoryName
-                // })
-                // .ToListAsync();
                 var records = _context.Articels
            .Include(a => a.TagArticles)
                .ThenInclude(ta => ta.Tags)
@@ -178,5 +158,158 @@ namespace CMS_BL.ArticleBL
                 throw new MyException("This is my exception");
             }
         }
+
+        public override async Task<ServicesResult> UpdateRecord(ArticleModel record, int recordId)
+        {
+            try
+            {
+                var existingArticle = await _context.Articels
+                    .Include(a => a.TagArticles)
+                    .Include(a => a.ArticleCategoryArticles)
+                    .FirstOrDefaultAsync(a => a.ArticleID == recordId);
+
+                if (existingArticle != null)
+                {
+                    existingArticle.ArticleID = record.ArticleID;
+                    existingArticle.Title = record.Title;
+                    existingArticle.Content = record.Content;
+                    existingArticle.Description = record.Description;
+                    existingArticle.Image = record.Image;
+                    existingArticle.Author = record.Author;
+                    // Cập nhật các trường khác trong bảng Product
+
+                    var tagArticles = record.TagName.Select(tag => new TagArticle
+                    {
+                        Tag = tag,
+                        ProductID = recordId
+                    }).ToList();
+                    await _context.SaveChangesAsync();
+
+                    return new ServicesResult
+                    {
+                        isSuccess = true
+                    };
+                }
+
+                return new ServicesResult
+                {
+                    isSuccess = false
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new MyException("This is my exception");
+            }
+        }
+
+
+        public override async Task<ServicesResult> CreateRecord(ProductModel model)
+        {
+            try
+            {
+                var newProduct = new Product
+                {
+                    ProductCode = model.ProductCode,
+                    ProductName = model.ProductName,
+                    ProductDescription = model.ProductDescription,
+                    // Gán các trường khác trong bảng Product
+                };
+
+                var newProductContent = new ProductContent
+                {
+                    ProductContentName = model.ProductContentName,
+                    // Gán các trường khác trong bảng ProductContent
+                };
+
+                var newProductImage = new ProductImage
+                {
+                    ProductImageSlug = model.ProductImageSlug,
+                    //IsDefault = model.IsDefault,
+                    // Gán các trường khác trong bảng ProductImage
+                };
+
+                var newProductMetaData = new ProductMetaData
+                {
+                    ProductMetaDataTitle = model.ProductMetaDataTitle,
+                    ProductMetadataDescrition = model.ProductMetadataDescrition,
+                    // Gán các trường khác trong bảng ProductMetaData
+                };
+
+                var newProductPrice = new ProductPrice
+                {
+                    ProductCost = model.ProductCost,
+                    ProductPromotional = model.ProductPromotional,
+                    // Gán các trường khác trong bảng ProductPrice
+                };
+
+                var category = await _context.Categories.FindAsync(model.CategoryId);
+                var newProductCategory = new ProductCategory
+                {
+                    Category = category
+                };
+
+                newProduct.ProductContents = new List<ProductContent> { newProductContent };
+                newProduct.ProductImages = new List<ProductImage> { newProductImage };
+                newProduct.ProductMetaDatas = new List<ProductMetaData> { newProductMetaData };
+                newProduct.ProductPrices = new List<ProductPrice> { newProductPrice };
+                newProduct.ProductCategories = new List<ProductCategory> { newProductCategory };
+
+                _context.Products.Add(newProduct);
+                await _context.SaveChangesAsync();
+
+                return new ServicesResult
+                {
+                    isSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new MyException("This is my exception");
+            }
+        }
+
+        public override async Task<ServicesResult> CreateRecord(ArticleModel model)
+        {
+            try
+            {
+                var newArticle = new Article
+                {
+                    Title = model.Title,
+                    Content = model.Content,
+                    // Gán các trường khác trong bảng Article
+                };
+
+                var tags = model.Tags.Select(tag => new TagArticle
+                {
+                    Tag = tag
+                }).ToList();
+
+                newArticle.TagArticles = tags;
+
+                var category = await _context.Categories.FindAsync(model.CategoryId);
+                var articleCategory = new ArticleCategory
+                {
+                    Category = category
+                };
+
+                newArticle.ArticleCategoryArticles = new List<ArticleCategory> { articleCategory };
+
+                _context.Articles.Add(newArticle);
+                await _context.SaveChangesAsync();
+
+                return new ServicesResult
+                {
+                    isSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new MyException("This is my exception");
+            }
+        }
+
     }
 }

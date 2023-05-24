@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMS_BASE_API.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20230508024849_createdb")]
-    partial class createdb
+    [Migration("20230522143037_adddb")]
+    partial class adddb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

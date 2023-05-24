@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CMS_BASE_API.Migrations
 {
     /// <inheritdoc />
-    public partial class createdb : Migration
+    public partial class adddb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
